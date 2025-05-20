@@ -12,6 +12,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
+use App\Exceptions\OtpException;
+use Random\RandomException;
 
 class User extends Authenticatable
 {
@@ -243,6 +245,7 @@ class User extends Authenticatable
                 return true;
             }
 
+            // Si la période de verrouillage est absente ou expirée, on la remet à jour
             if (!$this->otp_locked_until || $this->otp_locked_until->isPast()) {
                 $this->otp_locked_until = now()->addMinutes(30);
                 $this->save();
@@ -256,36 +259,32 @@ class User extends Authenticatable
 
     /**
      * Generate and save an OTP for the user.
+     * @throws RandomException
      */
     public function generateOtp()
     {
-        // Vérifier si l'OTP est activé
         if (!$this->otp_enabled) {
-            throw new \RuntimeException("L'authentification OTP n'est pas activée pour cet utilisateur.");
+            throw new OtpException("L'authentification OTP n'est pas activée pour cet utilisateur.", OtpException::OTP_DISABLED);
         }
 
-        // Vérifier si l'OTP est verrouillé
         if ($this->isOtpLocked()) {
             $minutesLeft = now()->diffInMinutes($this->otp_locked_until);
-            throw new \RuntimeException("L'authentification OTP est temporairement verrouillée. Réessayez dans {$minutesLeft} minutes.");
+            throw new OtpException("L'authentification OTP est temporairement verrouillée. Réessayez dans {$minutesLeft} minutes.", OtpException::OTP_LOCKED);
         }
 
-        // Générer un code OTP à 6 chiffres
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        // Sauvegarder le OTP (hashé pour plus de sécurité)
         $this->otp_secret = bcrypt($otp);
         $this->last_otp_sent = now();
         $this->failed_otp_attempts = 0;
 
-        // Sauvegarder l'historique des OTP
         $otpHistory = $this->otp_history ?? [];
         $otpHistory[] = [
             'sent_at' => now()->toIso8601String(),
             'method' => $this->otp_method->value
         ];
-
         $this->otp_history = $otpHistory;
+
         $this->save();
 
         return $otp;

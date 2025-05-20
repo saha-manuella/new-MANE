@@ -185,4 +185,25 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    /*
+   |--------------------------------------------------------------------------
+   | Custom Application Settings
+   |--------------------------------------------------------------------------
+   |
+   | Custom application-specific settings.
+   |
+   */
+
+    // Domaine email de l'entreprise pour la détermination du type de compte
+    'company_domain' => env('COMPANY_DOMAIN', 'groupecommercialbank.com'),
+
+    // Durée de validité d'un code OTP en minutes
+    'otp_expiry_minutes' => env('OTP_EXPIRY_MINUTES', 5),
+
+    // Nombre maximum de tentatives échouées pour l'OTP
+    'max_failed_otp_attempts' => env('MAX_FAILED_OTP_ATTEMPTS', 5),
+
+    // Durée de verrouillage de l'OTP en minutes après trop de tentatives échouées
+    'otp_lock_duration_minutes' => env('OTP_LOCK_DURATION_MINUTES', 30),
+
 ];

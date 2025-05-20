@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('est_actif')->default(true);
             $table->timestamp('date_creation'); // Date de création fonctionnelle
             $table->string('version');
+            $table->string('statut');
             $table->json('champs_config');
             $table->json('historique_modifications')->nullable();
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->onDelete('set null');

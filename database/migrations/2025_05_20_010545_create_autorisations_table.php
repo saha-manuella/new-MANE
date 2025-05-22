@@ -13,17 +13,13 @@ return new class extends Migration
     {
         Schema::create('autorisations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('document_id');
-            $table->unsignedBigInteger('role_id');
             $table->enum('niveau', ['lecture', 'modification', 'administration']);
             $table->timestamp('date_autorisation')->useCurrent();
             $table->timestamp('expire_le')->nullable();
-            $table->unsignedBigInteger('accorde_par_user_id')->nullable();
             $table->json('historique_modifications')->nullable();
             $table->foreignId('document_id')->constrained('documents')->onDelete('cascade');
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
             $table->foreignId('accorde_par_user_id')->nullable()->constrained('users')->onDelete('set null');
-
         });
     }
 

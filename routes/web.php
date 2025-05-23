@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+
+
+Route::prefix('verification')->group(function () {
+    Route::get('/', [VerificationController::class, 'index'])->name('verification');
+    Route::post('/verify', [VerificationController::class, 'verify'])->name('verification.verify');
+    Route::get('/resend', [VerificationController::class, 'resend'])->name('verification.resend');
 });
